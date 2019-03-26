@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 
 
-Route::get('/onHand/{id}', 'ShowOnHandTask@show');
+Route::get('/onHand/{id}', 'ShowOnHandTask@showonHand');
 Route::get('/subTask/{task_id}', 'ShowOnHandTask@subTaskIndex');
 Route::post('/timeInsert', 'ShowOnHandTask@storeTask');
 
