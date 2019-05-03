@@ -16,3 +16,9 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::GET('/onHand/{id}', 'ShowOnHandTask@showonHand');
+Route::POST('/subTask', 'ShowOnHandTask@subTaskIndex');
+Route::POST('/timeInsert', 'ShowOnHandTask@storeTask');
+Route::POST('/completeTask', 'ShowOnHandTask@completeTask');
+
