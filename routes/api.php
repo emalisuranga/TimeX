@@ -22,3 +22,9 @@ Route::POST('/subTask', 'ShowOnHandTask@subTaskIndex');
 Route::POST('/timeInsert', 'ShowOnHandTask@storeTask');
 Route::POST('/completeTask', 'ShowOnHandTask@completeTask');
 
+//
+//Route::GET('/onHand/{id}', 'SubTaskController@showonHand');
+//Route::POST('/subTask', 'ShowOnHandTask@subTaskIndex');
+//Route::POST('/timeInsert', 'ShowOnHandTask@storeTask');
+//Route::POST('/completeTask', 'ShowOnHandTask@completeTask');
+

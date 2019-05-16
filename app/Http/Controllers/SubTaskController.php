@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\TimeX_SubTask;
+use App\TimeX_TimeSheetMobileLog;
 
 class SubTaskController extends Controller
 {
@@ -108,51 +110,137 @@ class SubTaskController extends Controller
 
     public function storeTask(Request $request)
     {
-        $checkTask = TimeX_TimeSheetMobileLog::where('SubTaskId',$request->input('SubTaskId'))->first();
+//        $checkTask = TimeX_TimeSheetMobileLog::where('SubTaskId',$request->input('SubTaskId'))->first();
+//
+//        if($checkTask){
+//            DB::table('TimeX_SubTasks')
+//                ->where('SubTaskId',$request->input('SubTaskId'))
+//                ->update(['ActualStartDate' => date('Y-m-d H:i:s')]);
+//
+//            $newTask = new TimeX_TimeSheetMobileLog();
+//            $newTask->EmployeeId = $request->input('SubTaskId');
+//            $newTask->DeviceId = $request->input('DeviceId');
+//            $newTask->SubTaskId = $request->input('SubTaskId');
+//            $newTask->TaskStartDateTime = $request->input('TaskStartDateTime');
+//            $newTask->TaskEndDateTime = $request->input('TaskEndDateTime');
+//            $newTask->ElapsedTimeForTask = $request->input('ElapsedTimeForTask');
+//            $newTask->IsSynced = $request->input('IsSynced');
+//            $newTask->LocalDbId = $request->input('LocalDbId');
+//            $newTask->SyncedTime = $request->input('SyncedTime');
+//            $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
+//            if($newTask->save()){
+//                $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+//            } else {
+//                $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+//            }
+//
+//
+//        }else{
+//            $newTask = new TimeX_TimeSheetMobileLog();
+//            $newTask->EmployeeId = $request->input('SubTaskId');
+//            $newTask->DeviceId = $request->input('DeviceId');
+//            $newTask->SubTaskId = $request->input('SubTaskId');
+//            $newTask->TaskStartDateTime = $request->input('TaskStartDateTime');
+//            $newTask->TaskEndDateTime = $request->input('TaskEndDateTime');
+//            $newTask->ElapsedTimeForTask = $request->input('ElapsedTimeForTask');
+//            $newTask->IsSynced = $request->input('IsSynced');
+//            $newTask->LocalDbId = $request->input('LocalDbId');
+//            $newTask->SyncedTime = $request->input('SyncedTime');
+//            $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
+//            if($newTask->save()){
+//                $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+//            } else {
+//                $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+//            }
+//        }
+//
+//        return response()->json($data);
 
-        if($checkTask){
+        $checkTask = TimeX_TimeSheetMobileLog::where('SubTaskId',$request->input('SubTaskId'))->orderBy('MobileLog_RecordId', 'DESC')->first();
+        $currentDate = date('Y-m-d H:i:s');
+
+        if(!$checkTask) {
             DB::table('TimeX_SubTasks')
-                ->where('SubTaskId',$request->input('SubTaskId'))
-                ->update(['ActualStartDate' => date('Y-m-d H:i:s')]);
+                ->where('SubTaskId', $request->input('SubTaskId'))
+                ->update(['ActualStartDate' => $currentDate]);
 
             $newTask = new TimeX_TimeSheetMobileLog();
-            $newTask->EmployeeId = $request->input('SubTaskId');
+            $newTask->EmployeeId = $request->input('EmployeeId');
             $newTask->DeviceId = $request->input('DeviceId');
             $newTask->SubTaskId = $request->input('SubTaskId');
-            $newTask->TaskStartDateTime = $request->input('TaskStartDateTime');
-            $newTask->TaskEndDateTime = $request->input('TaskEndDateTime');
-            $newTask->ElapsedTimeForTask = $request->input('ElapsedTimeForTask');
+            $newTask->TaskStartDateTime = $currentDate;
+            $newTask->TaskEndDateTime = '00:00:00';
+            $newTask->ElapsedTimeForTask = '00:00:00';
             $newTask->IsSynced = $request->input('IsSynced');
             $newTask->LocalDbId = $request->input('LocalDbId');
-            $newTask->SyncedTime = $request->input('SyncedTime');
+            $newTask->SyncedTime = $currentDate;
             $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
-            if($newTask->save()){
+            if ($newTask->save()) {
                 $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
             } else {
                 $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
             }
-
-
-        }else{
-            $newTask = new TimeX_TimeSheetMobileLog();
-            $newTask->EmployeeId = $request->input('SubTaskId');
-            $newTask->DeviceId = $request->input('DeviceId');
-            $newTask->SubTaskId = $request->input('SubTaskId');
-            $newTask->TaskStartDateTime = $request->input('TaskStartDateTime');
-            $newTask->TaskEndDateTime = $request->input('TaskEndDateTime');
-            $newTask->ElapsedTimeForTask = $request->input('ElapsedTimeForTask');
-            $newTask->IsSynced = $request->input('IsSynced');
-            $newTask->LocalDbId = $request->input('LocalDbId');
-            $newTask->SyncedTime = $request->input('SyncedTime');
-            $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
-            if($newTask->save()){
-                $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+            return response()->json($data);
+        }else {
+            if ($request->input('status') == "start") {
+                $newTask = new TimeX_TimeSheetMobileLog();
+                $newTask->EmployeeId = $request->input('EmployeeId');
+                $newTask->DeviceId = $request->input('DeviceId');
+                $newTask->SubTaskId = $request->input('SubTaskId');
+                $newTask->TaskStartDateTime = $currentDate;
+                $newTask->TaskEndDateTime = '00:00:00';
+                $newTask->ElapsedTimeForTask = '00:00:00';
+                $newTask->IsSynced = $request->input('IsSynced');
+                $newTask->LocalDbId = $request->input('LocalDbId');
+                $newTask->SyncedTime = $currentDate;
+                $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
+                if ($newTask->save()) {
+                    $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+                } else {
+                    $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+                }
+                return response()->json($data);
             } else {
-                $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+                $startTime = Carbon::parse($checkTask->TaskStartDateTime);
+                $finishTime = Carbon::parse($currentDate);
+                $totalDuration = $finishTime->diffInSeconds($startTime);
+                $ElapsedTimeForTask = gmdate('H:i:s', $totalDuration);
+
+                if ($checkTask->TaskEndDateTime == '1900-01-01 00:00:00.000') {
+                    $newTask = DB::table('TimeX_TimeSheetMobileLog')
+                        ->where('TaskStartDateTime', $checkTask->TaskStartDateTime)
+                        ->update(['TaskEndDateTime' => $currentDate,'ElapsedTimeForTask' => $ElapsedTimeForTask]);
+                    if ($newTask) {
+                        $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+                    } else {
+                        $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+                    }
+                    return response()->json($data);
+                }else {
+                    $newTask = new TimeX_TimeSheetMobileLog();
+                    $newTask->EmployeeId = $request->input('EmployeeId');
+                    $newTask->DeviceId = $request->input('DeviceId');
+                    $newTask->SubTaskId = $request->input('SubTaskId');
+                    $newTask->TaskStartDateTime = $checkTask->TaskEndDateTime;
+                    $newTask->TaskEndDateTime = $currentDate;
+                    $newTask->ElapsedTimeForTask = $ElapsedTimeForTask;
+                    $newTask->IsSynced = $request->input('IsSynced');
+                    $newTask->LocalDbId = $request->input('LocalDbId');
+                    $newTask->SyncedTime = $currentDate;
+                    $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
+                    dd($newTask);
+                    if ($newTask->save()) {
+                        $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
+                    } else {
+                        $data['status'] = array('code' => 400, 'message' => "Something went wrong", 'error' => "Checkin details not saved.");
+                    }
+                    return response()->json($data);
+                }
             }
+
+
         }
 
-        return response()->json($data);
     }
 
     public function completeTask(Request $request){

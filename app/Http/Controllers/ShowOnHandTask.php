@@ -149,7 +149,6 @@ $count = count($week[0]);
 
     public function storeTask(Request $request)
     {
-
         $checkTask = TimeX_TimeSheetMobileLog::where('SubTaskId',$request->input('SubTaskId'))->orderBy('MobileLog_RecordId', 'DESC')->first();
 
         $currentDate = date('Y-m-d H:i:s');
@@ -200,7 +199,7 @@ $count = count($week[0]);
 //           }
 
        }else {
-               if ( $request->input('status') == "start") {
+               if ( $request->input('IsStopped') == '1') {
 
                    $newTask = new TimeX_TimeSheetMobileLog();
                    $newTask->EmployeeId = $request->input('EmployeeId');
@@ -222,12 +221,12 @@ $count = count($week[0]);
                    return response()->json($data);
                } else {
 
-                   $startTime = Carbon::parse($checkTask->TaskStartDateTime);
-                   $finishTime = Carbon::parse($currentDate);
-                   $totalDuration = $finishTime->diffInSeconds($startTime);
-                   $ElapsedTimeForTask = gmdate('H:i:s', $totalDuration);
-
                    if ($checkTask->TaskEndDateTime == '1900-01-01 00:00:00.000') {
+
+                       $startTime = Carbon::parse($checkTask->TaskStartDateTime);
+                       $finishTime = Carbon::parse($currentDate);
+                       $totalDuration = $finishTime->diffInSeconds($startTime);
+                       $ElapsedTimeForTask = gmdate('H:i:s', $totalDuration);
                       // dd("aa");
                        $newTask = DB::table('TimeX_TimeSheetMobileLog')
                            ->where('TaskStartDateTime', $checkTask->TaskStartDateTime)
@@ -239,6 +238,12 @@ $count = count($week[0]);
                        }
                        return response()->json($data);
                    }else {
+
+                       $startTime = Carbon::parse($checkTask->TaskEndDateTime);
+                       $finishTime = Carbon::parse($currentDate);
+                       $totalDuration = $finishTime->diffInSeconds($startTime);
+                       $ElapsedTimeForTask = gmdate('H:i:s', $totalDuration);
+
                        $newTask = new TimeX_TimeSheetMobileLog();
                        $newTask->EmployeeId = $request->input('EmployeeId');
                        $newTask->DeviceId = $request->input('DeviceId');
@@ -250,7 +255,7 @@ $count = count($week[0]);
                        $newTask->LocalDbId = $request->input('LocalDbId');
                        $newTask->SyncedTime = $currentDate;
                        $newTask->IsAvailableInTimeSheet = $request->input('IsAvailableInTimeSheet');
-                       dd($newTask);
+                       //dd($newTask);
                        if ($newTask->save()) {
                            $data['status'] = array('code' => 200, 'message' => "Successfully Checked out.", 'error' => "");
                        } else {
